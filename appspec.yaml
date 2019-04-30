@@ -1,0 +1,16 @@
+version: 0.0
+os: linux
+files:
+  - source: /tomcat/HelloWorld.war
+    destination: /home/ec2-user/HelloWorldJavaWar/webapps/
+hooks:
+  BeforeInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: root    
+    - location: scripts/StartMySQL.sh
+      timeout: 300
+      runas: root  
+    - location: scripts/StartTomcat.sh
+      timeout: 300
+      runas: root        

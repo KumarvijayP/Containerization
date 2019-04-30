@@ -1,0 +1,29 @@
+version: 0.1
+
+# REQUIRED ENVIRONMENT VARIABLES
+# AWS_KEY                   - AWS Access Key ID
+# AWS_SEC                   - AWS Secret Access Key
+# AWS_REG                   - AWS Default Region     (e.g. us-west-2)
+# AWS_OUT                   - AWS Output Format      (e.g. json)
+# AWS_PROF                  - AWS Profile name       (e.g. central-account)
+# IMAGE_REPO_NAME_MySQL     - Name of the MySQL image repo (e.g. mycontainer_mysql)
+# IMAGE_TAG_MySQL           - Tag for the image      (e.g. latest)
+# IMAGE_REPO_NAME_Tomcat    - Name of the image repo (e.g. my-webapp)
+# IMAGE_TAG_Tomcat          - Tag for the image      (e.g. latest)
+# AWS_ACCOUNT_ID            - Remote AWS account id  (e.g. 555555555555)
+
+#pre_build:
+#commands:
+#- printf "${AWS_KEY}\n${AWS_SEC}\n${AWS_REG}\n${AWS_OUT}\n" | aws configure --profile ${AWS_PROF}
+#- $(aws ecr get-login --profile ${AWS_PROF})
+
+phases:
+  build:
+    commands:
+      - docker build -t $IMAGE_REPO_NAME_MySQL -f MySQLDockerfile .
+      - docker build -t $IMAGE_REPO_NAME_Tomcat -f TomcatDockerfile .
+      - docker tag $IMAGE_REPO_NAME_MySQL:$IMAGE_TAG_MySQL $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REG.amazonaws.com/$IMAGE_REPO_NAME_MySQL:$IMAGE_TAG_MySQL  
+      - docker tag $IMAGE_REPO_NAME_Tomcat:$IMAGE_TAG_Tomcat $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REG.amazonaws.com/$IMAGE_REPO_NAME_Tomcat:$IMAGE_TAG_Tomcat       
+  post_build:
+    commands:
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REG.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
